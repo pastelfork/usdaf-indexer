@@ -19,8 +19,13 @@ ponder.on("ScrvusdUsdafLp:Transfer", async ({ event, context }) => {
 
   // if sender is not 0x0, we subtract from their balance
   if (event.args.sender !== zeroAddress) {
+    const depositor = getAddress(event.args.sender);
     await context.db
-      .update(UsdafLpBalance, { depositor: getAddress(event.args.sender) })
+      .insert(UsdafLpBalance)
+      .values({ depositor, balance: 0n })
+      .onConflictDoNothing();
+    await context.db
+      .update(UsdafLpBalance, { depositor })
       .set((row) => ({
         balance: row.balance - event.args.value,
       }));
@@ -34,10 +39,13 @@ ponder.on("ScrvusdUsdafSdGauge:Transfer", async ({ event, context }) => {
     getAddress(event.args._from) !==
       "0x42c006fE6958a5211513AA61a9b3145E99dDEEFF" // staking_token from Stakedao Liquidity Gauge V4
   ) {
+    const depositor = getAddress(event.args._from);
     await context.db
-      .update(UsdafLpBalance, {
-        depositor: getAddress(event.args._from),
-      })
+      .insert(UsdafLpBalance)
+      .values({ depositor, balance: 0n })
+      .onConflictDoNothing();
+    await context.db
+      .update(UsdafLpBalance, { depositor })
       .set((row) => ({
         balance: row.balance - event.args._value,
       }));
@@ -57,9 +65,13 @@ ponder.on("ScrvusdUsdafSdGauge:Transfer", async ({ event, context }) => {
 });
 
 ponder.on("ScrvusdUsdafSdGauge:Withdraw", async ({ event, context }) => {
-  const depositorAddress = getAddress(event.args.provider);
+  const depositor = getAddress(event.args.provider);
   await context.db
-    .update(UsdafLpBalance, { depositor: depositorAddress })
+    .insert(UsdafLpBalance)
+    .values({ depositor, balance: 0n })
+    .onConflictDoNothing();
+  await context.db
+    .update(UsdafLpBalance, { depositor })
     .set((row) => ({
       balance: row.balance - event.args.value,
     }));
@@ -73,9 +85,11 @@ ponder.on("ScrvusdUsdafSdGaugeV2:Transfer", async ({ event, context }) => {
 
   if (from !== zeroAddress) {
     await context.db
-      .update(UsdafLpBalance, {
-        depositor: from,
-      })
+      .insert(UsdafLpBalance)
+      .values({ depositor: from, balance: 0n })
+      .onConflictDoNothing();
+    await context.db
+      .update(UsdafLpBalance, { depositor: from })
       .set((row) => ({
         balance: row.balance - value,
       }));
@@ -97,10 +111,13 @@ ponder.on("ScrvusdUsdafSdGaugeV2:Transfer", async ({ event, context }) => {
 // Curve Gauge
 ponder.on("ScrvusdUsdafGauge:Transfer", async ({ event, context }) => {
   if (event.args._from !== zeroAddress) {
+    const depositor = getAddress(event.args._from);
     await context.db
-      .update(UsdafLpBalance, {
-        depositor: getAddress(event.args._from),
-      })
+      .insert(UsdafLpBalance)
+      .values({ depositor, balance: 0n })
+      .onConflictDoNothing();
+    await context.db
+      .update(UsdafLpBalance, { depositor })
       .set((row) => ({
         balance: row.balance - event.args._value,
       }));
@@ -127,9 +144,11 @@ ponder.on("ScrvusdUsdafYvault:Transfer", async ({ event, context }) => {
 
   if (sender !== zeroAddress) {
     await context.db
-      .update(UsdafLpBalance, {
-        depositor: sender,
-      })
+      .insert(UsdafLpBalance)
+      .values({ depositor: sender, yvaultShares: 0n })
+      .onConflictDoNothing();
+    await context.db
+      .update(UsdafLpBalance, { depositor: sender })
       .set((row) => ({
         yvaultShares: row.yvaultShares - shares,
       }));
@@ -156,9 +175,11 @@ ponder.on("ScrvusdUsdafBeefyVault:Transfer", async ({ event, context }) => {
 
   if (from !== zeroAddress) {
     await context.db
-      .update(UsdafLpBalance, {
-        depositor: from,
-      })
+      .insert(UsdafLpBalance)
+      .values({ depositor: from, beefyShares: 0n })
+      .onConflictDoNothing();
+    await context.db
+      .update(UsdafLpBalance, { depositor: from })
       .set((row) => ({
         beefyShares: row.beefyShares - shares,
       }));

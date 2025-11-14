@@ -88,8 +88,7 @@ When querying the above tables, it may be necessary to forward fill data for day
 
 - sUSDaf vault share balance
 
-`VeasfLocks`
-
+`VeasfLocks` 
 - Records all locks from deployment
 
 ## Deployment and Database
